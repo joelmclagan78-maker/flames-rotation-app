@@ -89,6 +89,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", 8501))
-    # This specific view skips the desktop 'signal' errors
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=port)
+    try:
+        # This view bypasses the 'signal' crash on web servers
+        ft.app(target=main, view=None, port=port)
+    except ValueError:
+        pass
 
