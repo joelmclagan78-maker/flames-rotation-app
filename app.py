@@ -1,14 +1,14 @@
 import flet as ft
-import asyncio
 import os
+import time
 
-# Main Dashboard for the Flames
-async def main(page: ft.Page):
+def main(page: ft.Page):
     page.title = "Flames Rotation Master"
     page.theme_mode = ft.ThemeMode.DARK
     page.bgcolor = "black"
     page.padding = 20
     
+    # Official Roster
     initial_roster = "Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie"
     players = {}
     state = {"running": False, "time": 1200, "half": "1st Half"}
@@ -23,23 +23,9 @@ async def main(page: ft.Page):
 
     build_roster(initial_roster)
 
-    async def tick():
-        while True:
-            if state["running"] and state["time"] > 0:
-                state["time"] -= 1
-                m, s = divmod(state["time"], 60)
-                timer_display.value = f"{m:02d}:{s:02d}"
-                for name, data in players.items():
-                    if data["status"] == "On Court":
-                        if state["half"] == "1st Half": data["h1_mins"] += 1
-                        else: data["h2_mins"] += 1
-                await render_players()
-                page.update()
-            await asyncio.sleep(1)
-
     player_list = ft.ListView(expand=True, spacing=10, padding=10)
 
-    async def render_players():
+    def render_players():
         player_list.controls.clear()
         for name, data in players.items():
             is_on_court = data["status"] == "On Court"
@@ -59,27 +45,40 @@ async def main(page: ft.Page):
                 ])
             player_list.controls.append(ft.Container(content=content, padding=15, border_radius=12, bgcolor=bg, on_click=toggle, data=name))
 
-    async def toggle(e):
+    def toggle(e):
         p_name = e.control.data
         players[p_name]["status"] = "On Court" if players[p_name]["status"] == "Bench" else "Bench"
-        await render_players()
+        render_players()
         page.update()
 
     roster_field = ft.TextField(label="Edit Names", value=initial_roster, multiline=True)
-    async def lock(e):
+    
+    def lock(e):
         build_roster(roster_field.value)
         setup_view.visible, game_view.visible = False, True
-        await render_players()
+        render_players()
         page.update()
 
     setup_view = ft.Container(content=ft.Column([ft.Text("ROSTER", size=20, weight="bold"), roster_field, ft.TextButton("LOCK & START", on_click=lock)]), padding=20)
     game_view = ft.Column([ft.Row([half_label]), timer_display, ft.Row([ft.TextButton("START", on_click=lambda _: state.update({"running": True})), ft.TextButton("STOP", on_click=lambda _: state.update({"running": False}))], alignment="center")], visible=False)
 
-    await render_players()
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
-    asyncio.create_task(tick())
+    render_players()
 
-# --- THE CHAMPIONSHIP EXECUTION BLOCK ---
+    # Simplified Web Timer Loop
+    while True:
+        if state["running"] and state["time"] > 0:
+            state["time"] -= 1
+            m, s = divmod(state["time"], 60)
+            timer_display.value = f"{m:02d}:{s:02d}"
+            for name, data in players.items():
+                if data["status"] == "On Court":
+                    if state["half"] == "1st Half": data["h1_mins"] += 1
+                    else: data["h2_mins"] += 1
+            render_players()
+            page.update()
+        time.sleep(1)
+
 if __name__ == "__main__":
-    # We use Port 8501 and force the WEB_BROWSER view to ensure visuals load
+    # Clean launch for Streamlit Cloud
     ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.getenv("PORT", 8501)))
