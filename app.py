@@ -84,7 +84,11 @@ async def main(page: ft.Page):
 if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", 8501))
-    ft.app(target=main, view=None, port=port)
+    try:
+        ft.app(target=main, view=None, port=port)
+    except ValueError:
+        # This bypasses the 'signal' error on web servers
+        pass
 
 
 
