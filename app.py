@@ -1,17 +1,14 @@
-import flet.fastapi as flet_fastapi
 import flet as ft
 import asyncio
 import os
 
+# Main Dashboard for the Flames
 async def main(page: ft.Page):
     page.title = "Flames Rotation Master"
     page.theme_mode = ft.ThemeMode.DARK
-    # Flexible height for mobile screens
-    page.window_height = 850
     page.bgcolor = "black"
     page.padding = 20
     
-    # Official Roster
     initial_roster = "Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie"
     players = {}
     state = {"running": False, "time": 1200, "half": "1st Half"}
@@ -51,7 +48,6 @@ async def main(page: ft.Page):
             m, s = divmod(total_secs, 60)
             
             if data["status"] == "Bench":
-                # High Visibility Bench Label
                 content = ft.Row([
                     ft.Text("BENCH", weight="bold", size=40, color="white", expand=True),
                     ft.Text(name.upper(), size=18, weight="bold", color="orange")
@@ -82,14 +78,8 @@ async def main(page: ft.Page):
     await render_players()
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
     asyncio.create_task(tick())
-# --- Final Web Execution ---
-# --- Final Web Execution ---
+
+# --- THE CHAMPIONSHIP EXECUTION BLOCK ---
 if __name__ == "__main__":
-    import os
-    port = int(os.getenv("PORT", 8501))
-    try:
-        # We switch to 'WEB_BROWSER' view to force the visuals to load
-        ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=port)
-    except ValueError:
-        # This catch is the 'safety' that prevents the red screen
-        pass
+    # We use Port 8501 and force the WEB_BROWSER view to ensure visuals load
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.getenv("PORT", 8501)))
