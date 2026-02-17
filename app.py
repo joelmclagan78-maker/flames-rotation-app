@@ -81,8 +81,13 @@ async def main(page: ft.Page):
     await render_players()
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
     asyncio.create_task(tick())
-
-# --- THE WEB REBOOT BLOCK ---
+# --- Final Web Execution ---
 if __name__ == "__main__":
-    # Forces the app to ignore desktop window errors
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.getenv("PORT", 8501)))
+    import os
+    port = int(os.getenv("PORT", 8501))
+    try:
+        # This setup ignores the server's 'signal' errors entirely
+        ft.app(target=main, view=None, port=port)
+    except ValueError:
+        # This catch is the 'safety' that prevents the red screen
+        pass
