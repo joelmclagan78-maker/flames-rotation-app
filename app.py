@@ -28,7 +28,6 @@ if st.session_state.page == "Setup":
         count = len(names)
         even_share = 100 / count if count > 0 else 0 
         
-        # Start: First 5 on court, others on bench with 1 stint
         st.session_state.players = {n: {
             "h1": 0, "h2": 0, "status": "On Court" if i < 5 else "Bench", 
             "target": even_share, "stints": 0 if i < 5 else 1
@@ -41,7 +40,9 @@ elif st.session_state.page == "Game":
     st.title(f"🔥 {st.session_state.game['half']}")
     
     m, s = divmod(st.session_state.game["clock"], 60)
-    st.metric("Time Remaining", f"{m:02d}:{s:02d}")
+    # Timer turns red when game is stopped or rotation needed
+    timer_color = "white" if st.session_state.game["running"] else "red"
+    st.markdown(f"<h1 style='text-align: center; color: {timer_color};'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
     if c1.button("START"): st.session_state.game["running"] = True
@@ -57,20 +58,23 @@ elif st.session_state.page == "Game":
     
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
+        # FAIR PLAY ALERT: Turn red if over target
+        over_time = data[half_key] >= data["target"]
+        text_color = "red" if (is_on and over_time) else "white"
         
-        # Grid: [Rotation & Stints] [Goal] [Adjustments]
         col_main, col_goal, col_m, col_p = st.columns([3, 2, 1, 1])
         
         btn_label = f"{'✅' if is_on else '🪑'} {name}: {int(data[half_key])}m (Off: {data['stints']})"
         if col_main.button(btn_label, key=f"p_{name}", type="primary" if is_on else "secondary", use_container_width=True):
-            if is_on: # Moving to bench
+            if is_on:
                 st.session_state.players[name]["status"] = "Bench"
                 st.session_state.players[name]["stints"] += 1
-            else: # Moving to court
+            else:
                 st.session_state.players[name]["status"] = "On Court"
             st.rerun()
 
-        col_goal.write(f"Goal: {data['target']:.1f}m")
+        # Visual Goal Alert
+        col_goal.markdown(f"<p style='color: {text_color}; font-weight: bold;'>Goal: {data['target']:.1f}m</p>", unsafe_allow_html=True)
 
         if col_m.button("➖", key=f"m_{name}"):
             balance_minutes(name, -1)
