@@ -80,12 +80,12 @@ async def main(page: ft.Page):
 
     await render_players()
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
-    asyncio.create_task(tick())
-
-# Final execution block for Streamlit
+    # Final execution block optimized for the web
 if __name__ == "__main__":
+    import os
+    # Streamlit uses Port 8501 as its default 'door'
     port = int(os.getenv("PORT", 8501))
-    try:
-        ft.app(target=main, view=None, port=port)
-    except ValueError:
-        pass
+    
+    # This specifically targets the web browser to clear the black screen
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=port)
+
