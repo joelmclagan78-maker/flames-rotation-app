@@ -5,7 +5,7 @@ import os
 async def main(page: ft.Page):
     page.title = "Flames Rotation Master"
     page.theme_mode = ft.ThemeMode.DARK
-    page.window_width = 450
+    # Flexible height for mobile screens
     page.window_height = 850
     page.bgcolor = "black"
     page.padding = 20
@@ -80,18 +80,9 @@ async def main(page: ft.Page):
 
     await render_players()
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
-    # Final execution block optimized for the web
-if __name__ == "__main__":
-    import os
-    # Streamlit uses Port 8501 as its default 'door'
-    port = int(os.getenv("PORT", 8501))
-    # Final execution for Streamlit Cloud
-if __name__ == "__main__":
-    import os
-    port = int(os.getenv("PORT", 8501))
-    try:
-        # This view bypasses the 'signal' crash on web servers
-        ft.app(target=main, view=None, port=port)
-    except ValueError:
-        pass
+    asyncio.create_task(tick())
 
+# --- THE WEB REBOOT BLOCK ---
+if __name__ == "__main__":
+    # Forces the app to ignore desktop window errors
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.getenv("PORT", 8501)))
