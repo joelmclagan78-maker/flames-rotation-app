@@ -82,8 +82,9 @@ async def main(page: ft.Page):
 
 # Explicit desktop execution
 if __name__ == "__main__":
-import os
-port = int(os.getenv("PORT", 8501))
-ft.app(target=main, view=None, port=port)
+    import os
+    port = int(os.getenv("PORT", 8501))
+    ft.app(target=main, view=None, port=port)
+
 
 
