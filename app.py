@@ -85,7 +85,12 @@ if __name__ == "__main__":
     import os
     # Streamlit uses Port 8501 as its default 'door'
     port = int(os.getenv("PORT", 8501))
-    
-    # This specifically targets the web browser to clear the black screen
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=port)
+    if __name__ == "__main__":
+    import os
+    port = int(os.getenv("PORT", 8501))
+    # Using 'None' as the view is the only way to bypass the signal error on Streamlit
+    try:
+        ft.app(target=main, view=None, port=port)
+    except ValueError:
+        pass
 
