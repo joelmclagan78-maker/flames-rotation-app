@@ -83,4 +83,9 @@ async def main(page: ft.Page):
 # Explicit desktop execution
 if __name__ == "__main__":
 
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+   import os
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8501))
+    ft.app(target=main, view=None, port=port)
+
