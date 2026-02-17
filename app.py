@@ -85,12 +85,10 @@ if __name__ == "__main__":
     import os
     # Streamlit uses Port 8501 as its default 'door'
     port = int(os.getenv("PORT", 8501))
-    if __name__ == "__main__":
+    # Final execution for Streamlit Cloud
+if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", 8501))
-    # Using 'None' as the view is the only way to bypass the signal error on Streamlit
-    try:
-        ft.app(target=main, view=None, port=port)
-    except ValueError:
-        pass
+    # This specific view skips the desktop 'signal' errors
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=port)
 
