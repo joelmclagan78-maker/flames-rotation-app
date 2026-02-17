@@ -1,12 +1,14 @@
 import flet as ft
 import asyncio
+import os
 
 async def main(page: ft.Page):
     page.title = "Flames Rotation Master"
     page.theme_mode = ft.ThemeMode.DARK
     page.window_width = 450
-    page.window_height = 800
+    page.window_height = 850
     page.bgcolor = "black"
+    page.padding = 20
     
     # Official Roster
     initial_roster = "Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie"
@@ -28,7 +30,7 @@ async def main(page: ft.Page):
             if state["running"] and state["time"] > 0:
                 state["time"] -= 1
                 m, s = divmod(state["time"], 60)
-                timer_display.value = "%02d:%02d" % (m, s)
+                timer_display.value = f"{m:02d}:{s:02d}"
                 for name, data in players.items():
                     if data["status"] == "On Court":
                         if state["half"] == "1st Half": data["h1_mins"] += 1
@@ -55,8 +57,8 @@ async def main(page: ft.Page):
                 ], alignment="center")
             else:
                 content = ft.Row([
-                    ft.Column([ft.Text(name, weight="bold", size=22), ft.Text("Goal: %sm" % data['target'], size=12)], expand=True),
-                    ft.Text("%sm %02ds" % (m, s), size=22, weight="bold")
+                    ft.Column([ft.Text(name, weight="bold", size=22), ft.Text(f"Goal: {data['target']}m", size=12)], expand=True),
+                    ft.Text(f"{m}m {s:02d}s", size=22, weight="bold")
                 ])
             player_list.controls.append(ft.Container(content=content, padding=15, border_radius=12, bgcolor=bg, on_click=toggle, data=name))
 
@@ -80,15 +82,10 @@ async def main(page: ft.Page):
     page.add(setup_view, ft.Container(content=game_view), ft.Container(content=player_list, expand=True))
     asyncio.create_task(tick())
 
-# Explicit desktop execution
+# Final execution block for Streamlit
 if __name__ == "__main__":
-    import os
     port = int(os.getenv("PORT", 8501))
     try:
         ft.app(target=main, view=None, port=port)
     except ValueError:
-        # This bypasses the 'signal' error on web servers
         pass
-
-
-
