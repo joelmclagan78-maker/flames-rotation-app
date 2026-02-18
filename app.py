@@ -1,25 +1,26 @@
 import streamlit as st
 import time
 
-# --- ROBUST STYLING ---
-st.set_page_config(page_title="Flames Master v4.2", layout="wide")
+# --- RESTORED SIDEBAR-WIDTH STYLING ---
+st.set_page_config(page_title="Flames Master v4.3", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
     div.stButton > button { 
         background-color: #1a1a1a; color: #FFD700; border: 2px solid #FFD700; 
-        border-radius: 8px; font-weight: bold; height: 45px !important; width: 100%;
+        border-radius: 8px; font-weight: bold; height: 50px !important; width: 100%;
+        font-size: 1.1em !important;
     }
-    .goal-text { font-size: 1.2em; color: #FFD700; font-weight: bold; text-align: center; margin-top: 10px; }
+    .goal-text { font-size: 1.3em; color: #FFD700; font-weight: bold; text-align: center; margin-top: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- INITIALIZE SESSION STATE ---
+# --- INIT STATE ---
 if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
-# REBALANCING LOGIC: Verified math to keep total time consistent
+# REBALANCING LOGIC: Verified math
 def rebalance(target_player, adjustment):
     others = [p for p in st.session_state.players if p != target_player]
     if not others: return
@@ -31,7 +32,11 @@ def rebalance(target_player, adjustment):
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Setup")
-    roster_input = st.text_area("Roster (Comma separated)", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
+    # RESTORED: Logo centered on setup
+    try: st.image("logo.png", width=150)
+    except: st.write("🔥 Flames Basketball")
+    
+    roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     names = [n.strip() for n in roster_input.split(",") if n.strip()]
     finishing_5 = st.multiselect("Select Finishing 5", options=names, max_selections=5)
     
@@ -46,8 +51,14 @@ if st.session_state.page == "Setup":
 
 # --- PAGE 2: GAME ---
 elif st.session_state.page == "Game":
-    m, s = divmod(st.session_state.game["clock"], 60)
-    st.markdown(f"<h1 style='text-align: center; color: #FFD700;'>{st.session_state.game['half']} - {m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
+    # RESTORED: Logo at top of game screen
+    col_logo, col_title = st.columns([1, 4])
+    with col_logo:
+        try: st.image("logo.png", width=100)
+        except: st.write("🔥")
+    with col_title:
+        m, s = divmod(st.session_state.game["clock"], 60)
+        st.markdown(f"<h1 style='color: #FFD700;'>{st.session_state.game['half']} - {m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
 
     # GAME CONTROLS
     c1, c2, c3, c4 = st.columns(4)
@@ -66,28 +77,25 @@ elif st.session_state.page == "Game":
     st.divider()
     half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
     
-    # PLAYER LIST
+    # RESTORED: Longer name boxes and clear adjustment buttons
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
-        col_btn, col_stats, col_minus, col_plus = st.columns([4, 3, 1, 1])
+        # Layout: Name(5), Goal(3), Minus(1), Plus(1)
+        col_btn, col_stats, col_minus, col_plus = st.columns([5, 3, 1, 1])
         
-        gas = "⚠️" if (is_on and data["consecutive"] > 360) else ""
-        bench_timer = f"({int(data['bench_time'])}s)" if not is_on else ""
+        gas = "⚠️ GAS!" if (is_on and data["consecutive"] > 360) else ""
+        bench_timer = f" (Rest: {int(data['bench_time'])}s)" if not is_on else ""
         
-        # Toggle On/Off
-        if col_btn.button(f"{'✅' if is_on else '🪑'} {name} {gas} {bench_timer}", key=f"btn_{name}"):
+        if col_btn.button(f"{'✅' if is_on else '🪑'} {name} {gas} {bench_timer}", key=f"p_{name}"):
             data["status"] = "Bench" if is_on else "On Court"
             data["consecutive"] = 0; data["bench_time"] = 0; st.rerun()
         
-        # Display Stats
         goal_color = "red" if (is_on and data[half_key] >= data["target"]) else "#FFD700"
         col_stats.markdown(f"<p class='goal-text' style='color:{goal_color};'>{int(data[half_key])}m / {data['target']:.1f}m</p>", unsafe_allow_html=True)
 
-        # ADJUSTMENT BUTTONS: Using standard text for absolute reliability
-        if col_minus.button("MINUS", key=f"sub_{name}"): 
-            rebalance(name, -1.0); st.rerun()
-        if col_plus.button("PLUS", key=f"add_{name}"): 
-            rebalance(name, 1.0); st.rerun()
+        # ADJUSTMENT BUTTONS: Restored text for absolute reliability
+        if col_minus.button("MINUS", key=f"m_{name}"): rebalance(name, -1.0); st.rerun()
+        if col_plus.button("PLUS", key=f"a_{name}"): rebalance(name, 1.0); st.rerun()
 
     # BACKGROUND TIMER ENGINE
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
@@ -100,6 +108,6 @@ elif st.session_state.page == "Game":
                 d["bench_time"] += 1
         st.rerun()
 
-    if st.button("⬅️ RESET EVERYTHING"): 
+    if st.button("⬅️ RESET SETUP"): 
         st.session_state.page = "Setup"
         st.rerun()
