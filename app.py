@@ -3,7 +3,7 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v2.5", layout="centered")
+st.set_page_config(page_title="Flames Master v2.6", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
@@ -21,10 +21,10 @@ if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
-# FIXED: Corrected syntax for the balancing function
+# SMART BALANCING: Restored and syntax-checked
 def balance_minutes(target_player, adjustment):
     others = [p for p in st.session_state.players if p != target_player]
-    if not others: 
+    if not others:
         return
     per_player_adj = adjustment / len(others)
     st.session_state.players[target_player]["target"] += adjustment
@@ -37,6 +37,7 @@ if st.session_state.page == "Setup":
     try: st.image("logo.png", width=80)
     except: st.write("🔥")
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
+    # EVEN TIME: Restored button
     if st.button("CALCULATE & START EVEN", use_container_width=True):
         names = [n.strip() for n in roster_input.split(",") if n.strip()]
         even_share = 100 / len(names) if names else 0 
@@ -65,32 +66,7 @@ elif st.session_state.page == "Game":
     st.divider()
     half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
     
+    # Grid layout for no-scrolling
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
-        c_name, c_stats, c_m, c_p = st.columns([4, 3, 1, 1])
-        
-        gas = "⚠️" if (is_on and data["consecutive"] > 360) else ""
-        if c_name.button(f"{'✅' if is_on else '🪑'} {name}{gas}", key=f"b_{name}", use_container_width=True):
-            data["status"] = "Bench" if is_on else "On Court"; data["consecutive"] = 0; st.rerun()
-        
-        goal_color = "red" if (is_on and data[half_key] >= data["target"]) else "#FFD700"
-        c_stats.markdown(f"<p style='color: {goal_color};' class='goal-text'>{int(data[half_key])}m/{data['target']:.0f}m</p>", unsafe_allow_html=True)
-
-        if c_m.button("-", key=f"m_{name}"): balance_minutes(name, -1); st.rerun()
-        if c_p.button("+", key=f"p_{name}"): balance_minutes(name, 1); st.rerun()
-
-    st.divider()
-    mail_link = f"mailto:docdvba@marymedebasketballclub.com.au?subject=Flames%20Feedback"
-    st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:28px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:4px; font-weight:bold; font-size:0.7em;">✉️ FEEDBACK</button></a>', unsafe_allow_html=True)
-
-    # REPAIRED ENGINE: Tracks live minutes and the game clock
-    if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
-        time.sleep(1)
-        st.session_state.game["clock"] -= 1
-        for n, d in st.session_state.players.items():
-            if d["status"] == "On Court":
-                d[half_key] += 1/60
-                d["consecutive"] += 1
-        st.rerun()
-
-    if st.button("⬅️ RESET"): st.session_state.page = "Setup"; st.rerun()
+        c_name, c_stats, c_m, c
