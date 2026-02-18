@@ -3,14 +3,12 @@ import time
 import urllib.parse
 
 # --- STYLING ---
-st.set_page_config(page_title="Flames Master v1.5", layout="centered")
+st.set_page_config(page_title="Flames Master v1.6", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
     div.stButton > button { background-color: #1a1a1a; color: #FFD700; border: 1px solid #FFD700; border-radius: 8px; font-weight: bold; }
     .goal-text { font-size: 0.85em; font-weight: bold; }
-    /* Header styling for the logo */
-    .header-box { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -41,7 +39,7 @@ if st.session_state.page == "Setup":
 
 # --- GAME PAGE ---
 elif st.session_state.page == "Game":
-    # Logo added to the Game page header
+    # Logo at the top of Game Page
     col_logo, col_text = st.columns([1, 3])
     with col_logo:
         try: st.image("logo.png", width=70)
@@ -78,8 +76,9 @@ elif st.session_state.page == "Game":
         if col_p.button("➕", key=f"a_{name}"): balance_minutes(name, 1); st.rerun()
 
     st.divider()
+    # FIXED: Added the @ symbol to the email address
     subject = urllib.parse.quote("Flames Feedback")
-    mail_link = f"mailto:docdvbamarymedebasketballclub.com.au?subject={subject}"
+    mail_link = f"mailto:docdvba@marymedebasketballclub.com.au?subject={subject}"
     st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:40px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:8px; font-weight:bold;">✉️ SEND FEEDBACK</button></a>', unsafe_allow_html=True)
 
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
@@ -92,3 +91,4 @@ elif st.session_state.page == "Game":
         st.rerun()
 
     if st.button("⬅️ RESET"): st.session_state.page = "Setup"; st.rerun()
+
