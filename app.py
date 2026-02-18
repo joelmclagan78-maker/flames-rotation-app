@@ -3,7 +3,21 @@ import time
 
 # --- STYLING & INIT ---
 st.set_page_config(page_title="Flames Smart Rotation", layout="centered")
-st.markdown("<style>body {background-color: black; color: white;}</style>", unsafe_allow_html=True)
+
+# Custom CSS for the Black and Yellow theme
+st.markdown("""
+    <style>
+    .stApp { background-color: black; color: white; }
+    div.stButton > button { 
+        background-color: #FFD700; 
+        color: black; 
+        border-radius: 10px; 
+        font-weight: bold;
+    }
+    div.stButton > button:hover { background-color: #FFC000; color: black; }
+    h1, h2, h3, p { color: #FFD700 !format; }
+    </style>
+    """, unsafe_allow_html=True)
 
 if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
@@ -21,6 +35,9 @@ def balance_minutes(target_player, adjustment):
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Smart Setup")
+    # Placeholder for the logo you just created
+    st.image("https://raw.githubusercontent.com/your-username/flames-rotation-app/main/logo.png", width=200)
+    
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     
     if st.button("CALCULATE & START EVEN", use_container_width=True):
@@ -40,7 +57,6 @@ elif st.session_state.page == "Game":
     st.title(f"🔥 {st.session_state.game['half']}")
     
     m, s = divmod(st.session_state.game["clock"], 60)
-    # Timer turns red when game is stopped or rotation needed
     timer_color = "white" if st.session_state.game["running"] else "red"
     st.markdown(f"<h1 style='text-align: center; color: {timer_color};'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
     
@@ -58,14 +74,13 @@ elif st.session_state.page == "Game":
     
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
-        # FAIR PLAY ALERT: Turn red if over target
         over_time = data[half_key] >= data["target"]
-        text_color = "red" if (is_on and over_time) else "white"
+        text_color = "red" if (is_on and over_time) else "#FFD700"
         
         col_main, col_goal, col_m, col_p = st.columns([3, 2, 1, 1])
         
         btn_label = f"{'✅' if is_on else '🪑'} {name}: {int(data[half_key])}m (Off: {data['stints']})"
-        if col_main.button(btn_label, key=f"p_{name}", type="primary" if is_on else "secondary", use_container_width=True):
+        if col_main.button(btn_label, key=f"p_{name}", use_container_width=True):
             if is_on:
                 st.session_state.players[name]["status"] = "Bench"
                 st.session_state.players[name]["stints"] += 1
@@ -73,7 +88,6 @@ elif st.session_state.page == "Game":
                 st.session_state.players[name]["status"] = "On Court"
             st.rerun()
 
-        # Visual Goal Alert
         col_goal.markdown(f"<p style='color: {text_color}; font-weight: bold;'>Goal: {data['target']:.1f}m</p>", unsafe_allow_html=True)
 
         if col_m.button("➖", key=f"m_{name}"):
@@ -89,9 +103,3 @@ elif st.session_state.page == "Game":
         st.session_state.game["clock"] -= 1
         for name, data in st.session_state.players.items():
             if data["status"] == "On Court":
-                data[half_key] += 1/60
-        st.rerun()
-
-    if st.button("⬅️ RESET ROSTER"):
-        st.session_state.page = "Setup"
-        st.rerun()
