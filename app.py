@@ -3,7 +3,7 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v2.9", layout="centered")
+st.set_page_config(page_title="Flames Master v3.0", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
@@ -61,4 +61,15 @@ elif st.session_state.page == "Game":
     if c1.button("START"): st.session_state.game["running"] = True
     if c2.button("STOP"): st.session_state.game["running"] = False
     if c3.button("NEXT"):
-        st.session_state.game["half"] = "2nd Half"; st.session_state.game["clock"] = 120
+        st.session_state.game["half"] = "2nd Half"; st.session_state.game["clock"] = 1200; st.rerun()
+
+    st.divider()
+    half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
+    
+    # FIXED: Corrected column assignment to prevent NameError
+    for name, data in st.session_state.players.items():
+        is_on = data["status"] == "On Court"
+        c_name, c_stats, c_minus, c_plus = st.columns([4, 3, 1, 1])
+        
+        gas = "⚠️" if (is_on and data["consecutive"] > 360) else ""
+        if c_name.button(f"{'✅' if is_on else '🪑'} {name}{gas}", key=f"b_{name}", use_container_width=True):
