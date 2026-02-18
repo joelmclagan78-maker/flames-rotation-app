@@ -24,7 +24,6 @@ if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
 def balance_minutes(target_player, adjustment):
-    """Zero-sum redistribution: if one gains time, others lose it evenly."""
     others = [p for p in st.session_state.players if p != target_player]
     if not others: return
     per_player_adj = adjustment / len(others)
@@ -35,8 +34,11 @@ def balance_minutes(target_player, adjustment):
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Smart Setup")
-    # Using your original yellow logo
-    st.image("logo.png", width=250)
+    # This line triggers the error if logo.png isn't uploaded
+    try:
+        st.image("logo.png", width=250)
+    except:
+        st.warning("Upload 'logo.png' to GitHub to see the team branding.")
     
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     
@@ -44,7 +46,6 @@ if st.session_state.page == "Setup":
         names = [n.strip() for n in roster_input.split(",") if n.strip()]
         count = len(names)
         even_share = 100 / count if count > 0 else 0 
-        
         st.session_state.players = {n: {
             "h1": 0, "h2": 0, "status": "On Court" if i < 5 else "Bench", 
             "target": even_share, "stints": 0 if i < 5 else 1
@@ -55,7 +56,6 @@ if st.session_state.page == "Setup":
 # --- PAGE 2: GAME ---
 elif st.session_state.page == "Game":
     st.title(f"🔥 {st.session_state.game['half']}")
-    
     m, s = divmod(st.session_state.game["clock"], 60)
     timer_color = "white" if st.session_state.game["running"] else "red"
     st.markdown(f"<h1 style='text-align: center; color: {timer_color};'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
@@ -69,17 +69,14 @@ elif st.session_state.page == "Game":
         st.rerun()
 
     st.divider()
-
     half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
     
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
-        # FAIR PLAY ALERT: Flash red if player is on court and over target
         over_time = data[half_key] >= data["target"]
         text_color = "red" if (is_on and over_time) else "#FFD700"
         
         col_main, col_goal, col_m, col_p = st.columns([3, 2, 1, 1])
-        
         btn_label = f"{'✅' if is_on else '🪑'} {name}: {int(data[half_key])}m (Off: {data['stints']})"
         if col_main.button(btn_label, key=f"p_{name}", use_container_width=True):
             if is_on:
@@ -110,3 +107,4 @@ elif st.session_state.page == "Game":
     if st.button("⬅️ RESET ROSTER"):
         st.session_state.page = "Setup"
         st.rerun()
+
