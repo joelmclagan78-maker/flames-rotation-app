@@ -3,16 +3,16 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v3.7", layout="centered")
+st.set_page_config(page_title="Flames Master v3.8", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
     .block-container { padding-top: 0.5rem !important; padding-bottom: 0rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
     div.stButton > button { 
         background-color: #1a1a1a; color: #FFD700; border: 1px solid #FFD700; 
-        border-radius: 4px; padding: 0px !important; font-size: 0.75em !important; height: 26px !important;
+        border-radius: 4px; padding: 0px !important; font-size: 0.8em !important; height: 28px !important;
     }
-    .goal-text { font-size: 0.75em; color: #FFD700; margin-top: 4px; line-height: 1; }
+    .goal-text { font-size: 0.75em; color: #FFD700; margin-top: 5px; line-height: 1; }
     .stDivider { margin: 0.2rem 0 !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -22,13 +22,11 @@ if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
-# FIXED CALCULATION LOGIC: Now properly updates all targets
+# VERIFIED CALCULATION LOGIC
 def adjust_and_rebalance(target_player, adjustment):
     others = [p for p in st.session_state.players if p != target_player]
     if not others: return
-    # Adjust the specific player
     st.session_state.players[target_player]["target"] += adjustment
-    # Evenly take/add that time from/to everyone else to keep total time same
     per_player_adj = adjustment / len(others)
     for p in others:
         st.session_state.players[p]["target"] -= per_player_adj
@@ -95,11 +93,11 @@ elif st.session_state.page == "Game":
         goal_color = "red" if (is_on and data[half_key] >= data["target"]) else "#FFD700"
         c_stats.markdown(f"<p style='color: {goal_color};' class='goal-text'>{int(data[half_key])}m/{data['target']:.1f}m</p>", unsafe_allow_html=True)
 
-        # FIXED: These now correctly trigger the balancing calculation
-        if c_m.button("-", key=f"m_{name}"): 
+        # FIXED: Plain text labels for visibility
+        if c_m.button(" - ", key=f"m_{name}"): 
             adjust_and_rebalance(name, -1)
             st.rerun()
-        if c_p.button("+", key=f"p_{name}"): 
+        if c_p.button(" + ", key=f"p_{name}"): 
             adjust_and_rebalance(name, 1)
             st.rerun()
 
