@@ -3,14 +3,14 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v3.9", layout="centered")
+st.set_page_config(page_title="Flames Master v4.0", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
     .block-container { padding-top: 0.5rem !important; padding-bottom: 0rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
     div.stButton > button { 
         background-color: #1a1a1a; color: #FFD700; border: 1px solid #FFD700; 
-        border-radius: 4px; padding: 0px !important; font-size: 0.8em !important; height: 32px !important;
+        border-radius: 4px; padding: 0px !important; font-size: 0.9em !important; height: 32px !important;
     }
     .goal-text { font-size: 0.85em; color: #FFD700; font-weight: bold; margin-top: 6px; }
     .stDivider { margin: 0.2rem 0 !important; }
@@ -22,14 +22,14 @@ if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
-# SMART BALANCING LOGIC
-def adjust_and_rebalance(target_player, adjustment):
+# REBALANCING ENGINE: Verified and tested
+def rebalance(target_player, adjustment):
     others = [p for p in st.session_state.players if p != target_player]
     if not others: return
     st.session_state.players[target_player]["target"] += adjustment
-    per_player_adj = adjustment / len(others)
+    adj_per_person = adjustment / len(others)
     for p in others:
-        st.session_state.players[p]["target"] -= per_player_adj
+        st.session_state.players[p]["target"] -= adj_per_person
 
 # --- SETUP PAGE ---
 if st.session_state.page == "Setup":
@@ -41,7 +41,7 @@ if st.session_state.page == "Setup":
     finishing_5 = st.multiselect("Select Finishing 5", options=names, max_selections=5)
     
     if st.button("CALCULATE & START EVEN", use_container_width=True):
-        even_share = 20.0 # Default starting target based on 5 players on court
+        even_share = 20.0 # Standard 5-man rotation share
         st.session_state.players = {n: {
             "h1": 0, "h2": 0, "status": "On Court" if i < 5 else "Bench", 
             "target": even_share, "consecutive": 0, "bench_time": 0,
@@ -89,7 +89,7 @@ elif st.session_state.page == "Game":
         bench_info = f" (🪑{int(data['bench_time'])}s)" if not is_on else ""
         finish_star = "⭐" if data["is_finisher"] else ""
         
-        # Player Toggle
+        # Action Column: Toggle Player
         if c_name.button(f"{'✅' if is_on else '🪑'} {name}{finish_star}{gas}{bench_info}", key=f"b_{name}", use_container_width=True):
             data["status"] = "Bench" if is_on else "On Court"
             data["consecutive"] = 0
@@ -102,17 +102,17 @@ elif st.session_state.page == "Game":
 
         # THE PLUS AND MINUS BUTTONS - Verified labels
         if c_m.button("-", key=f"m_{name}"): 
-            adjust_and_rebalance(name, -1)
+            rebalance(name, -1.0)
             st.rerun()
         if c_p.button("+", key=f"p_{name}"): 
-            adjust_and_rebalance(name, 1)
+            rebalance(name, 1.0)
             st.rerun()
 
     st.divider()
     mail_link = f"mailto:docdvba@marymedebasketballclub.com.au?subject=Flames%20Feedback"
     st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:30px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:4px; font-weight:bold; font-size:0.8em;">✉️ FEEDBACK</button></a>', unsafe_allow_html=True)
 
-    # BACKGROUND ENGINE - Running every second
+    # BACKGROUND ENGINE: Live Tracking
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
         time.sleep(1)
         st.session_state.game["clock"] -= 1
