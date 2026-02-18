@@ -3,7 +3,7 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v3.1", layout="centered")
+st.set_page_config(page_title="Flames Master v3.2", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
@@ -27,30 +27,4 @@ def balance_minutes(target_player, adjustment):
     if not others:
         return
     per_player_adj = adjustment / len(others)
-    st.session_state.players[target_player]["target"] += adjustment
-    for p in others:
-        st.session_state.players[p]["target"] -= per_player_adj
-
-# --- SETUP PAGE ---
-if st.session_state.page == "Setup":
-    st.title("🏀 Flames Setup")
-    try: st.image("logo.png", width=80)
-    except: st.write("🔥")
-    roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
-    if st.button("CALCULATE & START EVEN", use_container_width=True):
-        names = [n.strip() for n in roster_input.split(",") if n.strip()]
-        even_share = 100 / len(names) if names else 0 
-        st.session_state.players = {n: {"h1": 0, "h2": 0, "status": "On Court" if i < 5 else "Bench", "target": even_share, "consecutive": 0} for i, n in enumerate(names)}
-        st.session_state.page = "Game"
-        st.rerun()
-
-# --- GAME PAGE ---
-elif st.session_state.page == "Game":
-    col_l, col_t, col_s = st.columns([1, 2, 2])
-    with col_l:
-        try: st.image("logo.png", width=35)
-        except: st.write("🔥")
-    with col_t:
-        m, s = divmod(st.session_state.game["clock"], 60)
-        st.write(f"**{m:0
-        
+    st.session_state.players
