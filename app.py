@@ -14,8 +14,8 @@ st.markdown("""
         border-radius: 10px; 
         font-weight: bold;
     }
-    div.stButton > button:hover { background-color: #FFC000; color: black; }
-    h1, h2, h3, p { color: #FFD700 !format; }
+    div.stButton > button:hover { background-color: #f7d117; color: black; }
+    h1, h2, h3, p { color: #FFD700; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -35,8 +35,8 @@ def balance_minutes(target_player, adjustment):
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Smart Setup")
-    # Placeholder for the logo you just created
-    st.image("https://raw.githubusercontent.com/your-username/flames-rotation-app/main/logo.png", width=200)
+    # Using your original yellow logo
+    st.image("logo.png", width=250)
     
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     
@@ -74,6 +74,7 @@ elif st.session_state.page == "Game":
     
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
+        # FAIR PLAY ALERT: Flash red if player is on court and over target
         over_time = data[half_key] >= data["target"]
         text_color = "red" if (is_on and over_time) else "#FFD700"
         
@@ -88,7 +89,7 @@ elif st.session_state.page == "Game":
                 st.session_state.players[name]["status"] = "On Court"
             st.rerun()
 
-        col_goal.markdown(f"<p style='color: {text_color}; font-weight: bold;'>Goal: {data['target']:.1f}m</p>", unsafe_allow_html=True)
+        col_goal.markdown(f"<p style='color: {text_color}; font-weight: bold; margin: 0;'>Goal: {data['target']:.1f}m</p>", unsafe_allow_html=True)
 
         if col_m.button("➖", key=f"m_{name}"):
             balance_minutes(name, -1)
@@ -97,9 +98,15 @@ elif st.session_state.page == "Game":
             balance_minutes(name, 1)
             st.rerun()
 
-    # --- ENGINE ---
+    # --- ENGINE (FIXED INDENTATION) ---
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
         time.sleep(1)
         st.session_state.game["clock"] -= 1
         for name, data in st.session_state.players.items():
             if data["status"] == "On Court":
+                data[half_key] += 1/60
+        st.rerun()
+
+    if st.button("⬅️ RESET ROSTER"):
+        st.session_state.page = "Setup"
+        st.rerun()
