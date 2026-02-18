@@ -32,8 +32,4 @@ def balance_minutes(target_player, adjustment):
 
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
-    st.title("🏀 Flames Setup")
-    try: st.image("logo.png", width=120)
-    except: st.write("🔥")
-    
-    roster_
+    st.title("🏀
