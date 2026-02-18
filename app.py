@@ -3,12 +3,14 @@ import time
 import urllib.parse
 
 # --- STYLING ---
-st.set_page_config(page_title="Flames Master v1.4", layout="centered")
+st.set_page_config(page_title="Flames Master v1.5", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
     div.stButton > button { background-color: #1a1a1a; color: #FFD700; border: 1px solid #FFD700; border-radius: 8px; font-weight: bold; }
     .goal-text { font-size: 0.85em; font-weight: bold; }
+    /* Header styling for the logo */
+    .header-box { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -24,10 +26,10 @@ def balance_minutes(target_player, adjustment):
     for p in others:
         st.session_state.players[p]["target"] -= per_player_adj
 
-# --- SETUP ---
+# --- SETUP PAGE ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Setup")
-    try: st.image("logo.png", width=120)
+    try: st.image("logo.png", width=150)
     except: st.write("🔥")
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     if st.button("CALCULATE & START EVEN", use_container_width=True):
@@ -37,13 +39,18 @@ if st.session_state.page == "Setup":
         st.session_state.page = "Game"
         st.rerun()
 
-# --- GAME ---
+# --- GAME PAGE ---
 elif st.session_state.page == "Game":
-    # FIXED: Added closing quote and bracket
-    st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
+    # Logo added to the Game page header
+    col_logo, col_text = st.columns([1, 3])
+    with col_logo:
+        try: st.image("logo.png", width=70)
+        except: st.write("🔥")
+    with col_text:
+        st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
     
     m, s = divmod(st.session_state.game["clock"], 60)
-    st.markdown(f"<h1 style='text-align: center; color: #FFD700;'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center; color: #FFD700; margin-top: -10px;'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
     if c1.button("START"): st.session_state.game["running"] = True
@@ -54,7 +61,6 @@ elif st.session_state.page == "Game":
     st.divider()
     half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
     
-    # FIXED: Restored Smart Balancing and +/- Buttons
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
         gas_warning = " ⚠️ GAS LOW" if (is_on and data["consecutive"] > 360) else ""
@@ -74,10 +80,8 @@ elif st.session_state.page == "Game":
     st.divider()
     subject = urllib.parse.quote("Flames Feedback")
     mail_link = f"mailto:docdvbamarymedebasketballclub.com.au?subject={subject}"
-    # FIXED: Added missing closing bracket for st.markdown
     st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:40px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:8px; font-weight:bold;">✉️ SEND FEEDBACK</button></a>', unsafe_allow_html=True)
 
-    # FIXED: Corrected indentation for the timer engine
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
         time.sleep(1)
         st.session_state.game["clock"] -= 1
