@@ -16,9 +16,12 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- INIT STATE ---
-if "page" not in st.session_state: st.session_state.page = "Setup"
-if "players" not in st.session_state: st.session_state.players = {}
-if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
+if "page" not in st.session_state: 
+    st.session_state.page = "Setup"
+if "players" not in st.session_state: 
+    st.session_state.players = {}
+if "game" not in st.session_state: 
+    st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
 # SMART BALANCING LOGIC
 def balance_minutes(target_player, adjustment):
@@ -32,10 +35,11 @@ def balance_minutes(target_player, adjustment):
 
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
-    # FIXED: Added missing quote and variable name
     st.title("🏀 Flames Setup")
-    try: st.image("logo.png", width=120)
-    except: st.write("🔥")
+    try: 
+        st.image("logo.png", width=120)
+    except: 
+        st.write("🔥")
     
     roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     
@@ -58,10 +62,14 @@ elif st.session_state.page == "Game":
     st.markdown(f"<h1 style='text-align: center; color: #FFD700;'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
-    if c1.button("START"): st.session_state.game["running"] = True
-    if c2.button("STOP"): st.session_state.game["running"] = False
+    if c1.button("START"): 
+        st.session_state.game["running"] = True
+    if c2.button("STOP"): 
+        st.session_state.game["running"] = False
     if c3.button("NEXT"):
-        st.session_state.game["half"] = "2nd Half"; st.session_state.game["clock"] = 1200; st.rerun()
+        st.session_state.game["half"] = "2nd Half"
+        st.session_state.game["clock"] = 1200
+        st.rerun()
 
     st.divider()
 
@@ -89,4 +97,19 @@ elif st.session_state.page == "Game":
 
     st.divider()
     subject = urllib.parse.quote("Flames Feedback")
-    mail_link = f"mailto:docdvba@mary
+    # Corrected email: docdvba@marymedebasketballclub.com.au
+    mail_link = f"mailto:docdvba@marymedebasketballclub.com.au?subject={subject}"
+    st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:40px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:8px; font-weight:bold;">✉️ SEND FEEDBACK</button></a>', unsafe_allow_html=True)
+
+    if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
+        time.sleep(1)
+        st.session_state.game["clock"] -= 1
+        for n, d in st.session_state.players.items():
+            if d["status"] == "On Court":
+                d[half_key] += 1/60
+                d["consecutive"] += 1
+        st.rerun()
+
+    if st.button("⬅️ RESET"): 
+        st.session_state.page = "Setup"
+        st.rerun()
