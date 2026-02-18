@@ -12,6 +12,7 @@ st.markdown("""
         color: #FFD700; 
         border: 1px solid #FFD700;
         border-radius: 8px; 
+        font-weight: bold;
     }
     div.stButton > button:hover { background-color: #FFD700; color: black; }
     .goal-text { font-size: 0.9em; font-weight: bold; }
@@ -34,16 +35,16 @@ def balance_minutes(target_player, adjustment):
 # --- PAGE 1: SETUP ---
 if st.session_state.page == "Setup":
     st.title("🏀 Flames Smart Setup")
-    try: st.image("logo.png", width=120)
+    try: st.image("logo.png", width=150)
     except: st.write("🔥")
     
-    roster_input = st.text_area("Enter Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
+    roster_input = st.text_area("Roster", value="Xavier, Max, Jordan, Bertrand, Tyler, Jerry, Alex, Vinnie")
     names = [n.strip() for n in roster_input.split(",") if n.strip()]
     
     st.subheader("Select your Finishing 5")
     st.session_state.finishing_5 = st.multiselect("Who finishes the game?", names, max_selections=5)
     
-    if st.button("CALCULATE & START EVEN", use_container_width=True):
+    if st.button("START GAME", use_container_width=True):
         count = len(names)
         even_share = 100 / count if count > 0 else 0 
         st.session_state.players = {n: {
@@ -55,7 +56,7 @@ if st.session_state.page == "Setup":
 
 # --- PAGE 2: GAME ---
 elif st.session_state.page == "Game":
-    st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
+    st.subheader(f"Flames: {st.session_state.game['half']}")
 
     m, s = divmod(st.session_state.game["clock"], 60)
     timer_color = "#FFD700" if st.session_state.game["running"] else "red"
@@ -64,7 +65,7 @@ elif st.session_state.page == "Game":
     c1, c2, c3 = st.columns(3)
     if c1.button("START"): st.session_state.game["running"] = True
     if c2.button("STOP"): st.session_state.game["running"] = False
-    if c3.button("HALF"):
+    if c3.button("NEXT"):
         st.session_state.game["half"] = "2nd Half"
         st.session_state.game["clock"] = 1200
         st.rerun()
@@ -75,9 +76,6 @@ elif st.session_state.page == "Game":
     for name, data in st.session_state.players.items():
         is_on = data["status"] == "On Court"
         is_finisher = name in st.session_state.finishing_5
-        
-        # AI Suggestion Logic: If they are a finisher and game is late, keep them on. 
-        # If they are a finisher and game is early, suggest resting them soon.
         indicator = "⭐" if is_finisher else ""
         
         col_main, col_goal, col_m, col_p = st.columns([3, 2, 1, 1])
@@ -98,7 +96,6 @@ elif st.session_state.page == "Game":
         if col_m.button("➖", key=f"m_{name}"): balance_minutes(name, -1); st.rerun()
         if col_p.button("➕", key=f"a_{name}"): balance_minutes(name, 1); st.rerun()
 
-    # --- ENGINE ---
     if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
         time.sleep(1)
         st.session_state.game["clock"] -= 1
