@@ -66,4 +66,6 @@ elif st.session_state.page == "Game":
         st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
     
     m, s = divmod(st.session_state.game["clock"], 60)
-    st.markdown(f"
+    st.markdown(f"<h1 style='text-align: center; color: #FFD700;'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
+
+    # RESTORED CONTRO
