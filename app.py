@@ -56,60 +56,14 @@ if st.session_state.page == "Setup":
 
 # --- PAGE 2: GAME ---
 elif st.session_state.page == "Game":
-    st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
+    col_l, col_r = st.columns([1, 4])
+    with col_l:
+        try:
+            st.image("logo.png", width=80)
+        except:
+            st.write("🔥")
+    with col_r:
+        st.subheader(f"Flames Rotation: {st.session_state.game['half']}")
     
     m, s = divmod(st.session_state.game["clock"], 60)
-    st.markdown(f"<h1 style='text-align: center; color: #FFD700;'>{m:02d}:{s:02d}</h1>", unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns(3)
-    if c1.button("START"): 
-        st.session_state.game["running"] = True
-    if c2.button("STOP"): 
-        st.session_state.game["running"] = False
-    if c3.button("NEXT"):
-        st.session_state.game["half"] = "2nd Half"
-        st.session_state.game["clock"] = 1200
-        st.rerun()
-
-    st.divider()
-
-    half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
-    for name, data in st.session_state.players.items():
-        is_on = data["status"] == "On Court"
-        gas_warning = " ⚠️ GAS LOW" if (is_on and data["consecutive"] > 360) else ""
-        
-        col_name, col_goal, col_m, col_p = st.columns([3, 2, 1, 1])
-        
-        if col_name.button(f"{'✅' if is_on else '🪑'} {name}{gas_warning}", key=f"btn_{name}", use_container_width=True):
-            data["status"] = "Bench" if is_on else "On Court"
-            data["consecutive"] = 0
-            st.rerun()
-        
-        goal_color = "red" if (is_on and data[half_key] >= data["target"]) else "#FFD700"
-        col_goal.markdown(f"<p style='color: {goal_color};' class='goal-text'>{int(data[half_key])}m / {data['target']:.1f}m</p>", unsafe_allow_html=True)
-
-        if col_m.button("➖", key=f"m_{name}"):
-            balance_minutes(name, -1)
-            st.rerun()
-        if col_p.button("➕", key=f"a_{name}"):
-            balance_minutes(name, 1)
-            st.rerun()
-
-    st.divider()
-    subject = urllib.parse.quote("Flames Feedback")
-    # Corrected email: docdvba@marymedebasketballclub.com.au
-    mail_link = f"mailto:docdvba@marymedebasketballclub.com.au?subject={subject}"
-    st.markdown(f'<a href="{mail_link}" target="_blank"><button style="width:100%; height:40px; background-color:#1a1a1a; color:#FFD700; border:1px solid #FFD700; border-radius:8px; font-weight:bold;">✉️ SEND FEEDBACK</button></a>', unsafe_allow_html=True)
-
-    if st.session_state.game["running"] and st.session_state.game["clock"] > 0:
-        time.sleep(1)
-        st.session_state.game["clock"] -= 1
-        for n, d in st.session_state.players.items():
-            if d["status"] == "On Court":
-                d[half_key] += 1/60
-                d["consecutive"] += 1
-        st.rerun()
-
-    if st.button("⬅️ RESET"): 
-        st.session_state.page = "Setup"
-        st.rerun()
+    st.markdown(f"
