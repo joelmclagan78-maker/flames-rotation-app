@@ -3,7 +3,7 @@ import time
 import urllib.parse
 
 # --- ULTRA-COMPACT MOBILE STYLING ---
-st.set_page_config(page_title="Flames Master v3.0", layout="centered")
+st.set_page_config(page_title="Flames Master v3.1", layout="centered")
 st.markdown("""
     <style>
     .stApp { background-color: #0d0d0d; color: #f0f0f0; }
@@ -22,7 +22,6 @@ if "page" not in st.session_state: st.session_state.page = "Setup"
 if "players" not in st.session_state: st.session_state.players = {}
 if "game" not in st.session_state: st.session_state.game = {"running": False, "clock": 1200, "half": "1st Half"}
 
-# SMART BALANCING: Restored and syntax-checked
 def balance_minutes(target_player, adjustment):
     others = [p for p in st.session_state.players if p != target_player]
     if not others:
@@ -45,7 +44,7 @@ if st.session_state.page == "Setup":
         st.session_state.page = "Game"
         st.rerun()
 
-# --- GAME PAGE: ONE-SCREEN GRID ---
+# --- GAME PAGE ---
 elif st.session_state.page == "Game":
     col_l, col_t, col_s = st.columns([1, 2, 2])
     with col_l:
@@ -53,23 +52,5 @@ elif st.session_state.page == "Game":
         except: st.write("🔥")
     with col_t:
         m, s = divmod(st.session_state.game["clock"], 60)
-        st.write(f"**{m:02d}:{s:02d}**") 
-    with col_s:
-        st.write(f"**{st.session_state.game['half']}**")
-
-    c1, c2, c3 = st.columns(3)
-    if c1.button("START"): st.session_state.game["running"] = True
-    if c2.button("STOP"): st.session_state.game["running"] = False
-    if c3.button("NEXT"):
-        st.session_state.game["half"] = "2nd Half"; st.session_state.game["clock"] = 1200; st.rerun()
-
-    st.divider()
-    half_key = "h1" if st.session_state.game["half"] == "1st Half" else "h2"
-    
-    # FIXED: Corrected column assignment to prevent NameError
-    for name, data in st.session_state.players.items():
-        is_on = data["status"] == "On Court"
-        c_name, c_stats, c_minus, c_plus = st.columns([4, 3, 1, 1])
+        st.write(f"**{m:0
         
-        gas = "⚠️" if (is_on and data["consecutive"] > 360) else ""
-        if c_name.button(f"{'✅' if is_on else '🪑'} {name}{gas}", key=f"b_{name}", use_container_width=True):
